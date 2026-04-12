@@ -39,8 +39,20 @@ void generate(struct level *l)
 
 	const int min_room_rows = 3, min_room_cols = 3;
 
+	/*
+		Stores entrance data to create paths between nodes
+		- Sector (0, 0) ->
+			(left ent. row, right ent. row, top ent. col, bottom ent. col)
+		- Sector (0, 1) ->
+			(left ent. row, right ent. row, top ent. col, bottom ent. col)
+		...
+	*/
+	int entrances[4][4][4] = { 0 };
+
 	for (int sr = 0; sr < vertical_sectors; sr++) {
 		for (int sc = 0; sc < horizontal_sectors; sc++) {
+
+			/* below repeats for each sector (1 sector -> 1 room) */
 			int room_rows = min_room_rows
 				+ (rand() % (max_room_rows - min_room_rows));
 			int room_cols = min_room_cols
@@ -80,6 +92,33 @@ void generate(struct level *l)
 
 					l->data[abs_row_pos][abs_col_pos] = '.';
 				}
+			}
+
+			/* Create entrances */
+			if (sc != 0) { /* left */
+				int i = rand() % room_rows;
+				l->data[abs_row_start + 1 + i][abs_col_start] = '+';
+				entrances[sr][sc][0] = i;
+			}
+
+			if (sc != horizontal_sectors - 1) { /* right */
+				int i = rand() % room_rows;
+				l->data[abs_row_start + 1 + i]
+						[abs_col_start + 1 + room_cols] = '+';
+				entrances[sr][sc][1] = i;
+			}
+
+			if (sr != 0) { /* top */
+				int i = rand() % room_rows;
+				l->data[abs_row_start][abs_col_start + 1 + i] = '+';
+				entrances[sr][sc][2] = i;
+			}
+
+			if (sr != vertical_sectors - 1) { /* bottom */
+				int i = rand() % room_rows;
+				l->data[abs_row_start + 1 + room_rows]
+					[abs_col_start + 1 + i] = '+';
+				entrances[sr][sc][3] = i;
 			}
 		}
 	}
