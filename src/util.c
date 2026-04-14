@@ -130,7 +130,7 @@ void generate(struct level *l)
 				}
 			}
 
-			/* Create entrances */
+			/* Draw entrances */
 			if (sc != 0) /* left */
 				l->data[abs_row_start + entrances[sr][sc][0] + 1]
 						[abs_col_start] = '+';
