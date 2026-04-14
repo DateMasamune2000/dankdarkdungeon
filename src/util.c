@@ -86,18 +86,13 @@ create_rooms(
 	}
 }
 
-void generate(struct level *l)
+void
+render_rooms(
+	int vertical_sectors,
+	int horizontal_sectors,
+	struct room rooms[4][4],
+	struct level *l)
 {
-	initialize(l);
-
-	int vertical_sectors = (rand() % 4) + 1;
-	int horizontal_sectors = (rand() % 4) + 1;
-
-	struct room rooms[4][4];
-	int entrances[4][4][4]	= { 0 };
-
-	create_rooms(vertical_sectors, horizontal_sectors, rooms, entrances);
-
 	int sector_size_rows = (24 / vertical_sectors);
 	int sector_size_cols = (80 / horizontal_sectors);
 
@@ -129,6 +124,31 @@ void generate(struct level *l)
 					l->data[abs_row_pos][abs_col_pos] = '.';
 				}
 			}
+		}
+	}
+}
+
+void
+render_entrances(
+	int vertical_sectors,
+	int horizontal_sectors,
+	struct room rooms[4][4],
+	int entrances[4][4][4],
+	struct level *l)
+{
+	int sector_size_rows = (24 / vertical_sectors);
+	int sector_size_cols = (80 / horizontal_sectors);
+
+	for (int sr = 0; sr < vertical_sectors; sr++) {
+		for (int sc = 0; sc < horizontal_sectors; sc++) {
+			int start_col = rooms[sr][sc].start_col;
+			int start_row = rooms[sr][sc].start_row;
+
+			int room_rows = rooms[sr][sc].span_rows;
+			int room_cols = rooms[sr][sc].span_cols;
+
+			int abs_row_start = sr*sector_size_rows + start_row - 1;
+			int abs_col_start = sc*sector_size_cols + start_col - 1;
 
 			/* Draw entrances */
 			if (sc != 0) /* left */
@@ -145,4 +165,19 @@ void generate(struct level *l)
 						[abs_col_start + entrances[sr][sc][3] + 1] = '+';
 		}
 	}
+}
+
+void generate(struct level *l)
+{
+	initialize(l);
+
+	int vertical_sectors = (rand() % 4) + 1;
+	int horizontal_sectors = (rand() % 4) + 1;
+
+	struct room rooms[4][4];
+	int entrances[4][4][4]	= { 0 };
+
+	create_rooms(vertical_sectors, horizontal_sectors, rooms, entrances);
+	render_rooms(vertical_sectors, horizontal_sectors, rooms, l);
+	render_entrances(vertical_sectors, horizontal_sectors, rooms, entrances, l);
 }
