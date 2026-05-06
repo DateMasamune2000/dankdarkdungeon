@@ -167,6 +167,59 @@ render_entrances(
 	}
 }
 
+void
+render_paths(
+	int vertical_sectors,
+	int horizontal_sectors,
+	struct room rooms[4][4],
+	int entrances[4][4][4],
+	struct level *l)
+{
+	int sector_size_rows = (24 / vertical_sectors);
+	int sector_size_cols = (80 / horizontal_sectors);
+
+	for (int sr = 0; sr < vertical_sectors; sr++) {
+		for (int sc = 0; sc < horizontal_sectors; sc++) {
+
+			int start_col = rooms[sr][sc].start_col;
+			int start_row = rooms[sr][sc].start_row;
+
+			int room_rows = rooms[sr][sc].span_rows;
+			int room_cols = rooms[sr][sc].span_cols;
+
+			int abs_row_start = sr*sector_size_rows + start_row - 1;
+			int abs_col_start = sc*sector_size_cols + start_col - 1;
+
+			/* Left entrance */
+			if (sc != 0) {
+				/* required computation */
+				int this_entrance = entrances[sr][sc][0];
+				int prev_entrance = entrances[sr][sc-1][1];
+				
+				int abs_row = abs_row_start + entrances[sr][sc][0];
+				
+				int abs_row_prev =
+					rooms[sr][sc-1].start_row - 1
+						+ sr*sector_size_rows
+							+ prev_entrance;
+				
+				int abs_col_prev = 
+					rooms[sr][sc-1].start_col - 1
+						+ sc*sector_size_cols
+							+ rooms[sr][sc-1].span_cols;
+				
+				/* row difference */
+				int abs_row_diff = abs_row - abs_row_prev;
+				int inc = abs_row_diff < 0? -1 : 1;
+				
+				for (int i = 0; i != abs_row_diff + inc; i += inc) {
+					l->data[abs_row + this_entrance - i+1][abs_col_start - 1] = '*';
+				}	
+			}
+		}
+	}
+}
+
 void generate(struct level *l)
 {
 	initialize(l);
@@ -178,6 +231,8 @@ void generate(struct level *l)
 	int entrances[4][4][4]	= { 0 };
 
 	create_rooms(vertical_sectors, horizontal_sectors, rooms, entrances);
+
 	render_rooms(vertical_sectors, horizontal_sectors, rooms, l);
 	render_entrances(vertical_sectors, horizontal_sectors, rooms, entrances, l);
+	render_paths(vertical_sectors, horizontal_sectors, rooms, entrances, l);
 }
