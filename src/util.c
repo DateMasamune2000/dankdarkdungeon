@@ -74,12 +74,12 @@ create_rooms(
 			}
 
 			if (sr != 0) { /* top */
-				int i = rand() % room_rows;
+				int i = rand() % room_cols;
 				entrances[sr][sc][2] = i;
 			}
 
 			if (sr != vertical_sectors - 1) { /* bottom */
-				int i = rand() % room_rows;
+				int i = rand() % room_cols;
 				entrances[sr][sc][3] = i;
 			}
 		}
@@ -196,25 +196,32 @@ render_paths(
 				int this_entrance = entrances[sr][sc][0];
 				int prev_entrance = entrances[sr][sc-1][1];
 				
-				int abs_row = abs_row_start + entrances[sr][sc][0];
+				int entrance_row = abs_row_start + this_entrance;
 				
-				int abs_row_prev =
+				int entrance_row_prev =
 					rooms[sr][sc-1].start_row - 1
 						+ sr*sector_size_rows
 							+ prev_entrance;
 				
 				int abs_col_prev = 
 					rooms[sr][sc-1].start_col - 1
-						+ sc*sector_size_cols
+						+ (sc-1)*sector_size_cols
 							+ rooms[sr][sc-1].span_cols;
 				
 				/* row difference */
-				int abs_row_diff = abs_row - abs_row_prev;
-				int inc = abs_row_diff < 0? -1 : 1;
+				int entrance_row_diff = entrance_row - entrance_row_prev;
+				int inc = entrance_row_diff < 0? -1 : 1;
 				
-				for (int i = 0; i != abs_row_diff + inc; i += inc) {
-					l->data[abs_row + this_entrance - i+1][abs_col_start - 1] = '*';
-				}	
+				for (int i = 0; i != entrance_row_diff + inc; i += inc) {
+					l->data[entrance_row - i + 1][abs_col_start - 1] = '*';
+				}
+				
+				/* column difference */
+				int entrance_col_diff = abs_col_start - abs_col_prev - 1;
+				
+				for (int i = 2; i != entrance_col_diff; i++) {
+					l->data[entrance_row - entrance_row_diff + 1][abs_col_prev + i] = '*';
+				}
 			}
 		}
 	}
